@@ -21,13 +21,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/searchEditText"
+            android:lines="1"
+            android:maxLines="1"
+            android:singleLine="true"
             android:hint="@string/search_hint"/>
 
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:id="@+id/artistRecyclerView"-->
-            <!--/>-->
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/artistRecyclerView"
+            />
 
     </LinearLayout>
 

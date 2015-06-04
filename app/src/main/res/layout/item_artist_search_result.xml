@@ -8,9 +8,9 @@
     <ImageView
         android:layout_width="72dp"
         android:layout_height="72dp"
-        android:id="@+id/albumImageView"
+        android:id="@+id/artistImageView"
         android:layout_margin="20dp"
-        tools:background="@color/amber_a400"
+        android:background="@color/amber_a400"
         />
 
     <TextView
