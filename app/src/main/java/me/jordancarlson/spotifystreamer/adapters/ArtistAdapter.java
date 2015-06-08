@@ -3,7 +3,7 @@ package me.jordancarlson.spotifystreamer.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +12,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
-import me.jordancarlson.spotifystreamer.ArtistSearchActivity;
+import me.jordancarlson.spotifystreamer.ParcelableArtist;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.TopTracksActivity;
 
@@ -25,12 +21,12 @@ import me.jordancarlson.spotifystreamer.TopTracksActivity;
  */
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {
 
-    private List<Artist> mArtists;
+    private ParcelableArtist[] mArtists;
     private Context mContext;
     public static final String SPOTIFY_ID = "spotifyId";
     public static final String ARTIST_NAME = "artistName";
 
-    public ArtistAdapter(List<Artist> artists) {
+    public ArtistAdapter(ParcelableArtist[] artists) {
         mArtists = artists;
     }
 
@@ -44,7 +40,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
     @Override
     public void onBindViewHolder(ArtistViewHolder holder, int position) {
-        holder.bindItem(mArtists.get(position));
+        holder.bindItem(mArtists[position]);
 
     }
 
@@ -59,7 +55,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
     @Override
     public int getItemCount() {
-        return mArtists.size();
+        return mArtists.length;
     }
 
     public class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -76,14 +72,13 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
             itemView.setOnClickListener(this);
         }
 
-        public void bindItem(Artist artist) {
-            mArtistName = artist.name;
-            mSpotifyId = artist.id;
-            mArtistTextView.setText(artist.name);
-            if (artist.images.size() != 0) {
-                String url = artist.images.get(0).url;
+        public void bindItem(ParcelableArtist artist) {
+            mArtistName = artist.getArtistName();
+            mSpotifyId = artist.getSpotifyId();
+            mArtistTextView.setText(artist.getArtistName());
+            if (!TextUtils.isEmpty(artist.getImageUrl())) {
                 Picasso.with(mContext)
-                        .load(url)
+                        .load(artist.getImageUrl())
                         .fit()
                         .centerCrop()
                         .into(mArtistImageView);

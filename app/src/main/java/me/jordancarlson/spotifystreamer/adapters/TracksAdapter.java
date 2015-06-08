@@ -1,7 +1,6 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +12,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Track;
 import me.jordancarlson.spotifystreamer.R;
-import me.jordancarlson.spotifystreamer.TopTracksActivity;
 
 /**
  * Custom adapter for the recycler view of Tracks returned by the Spotify API.
@@ -25,8 +22,6 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
     private List<Track> mTracks;
     private Context mContext;
-//    public static final String SPOTIFY_ID = "spotifyId";
-//    public static final String ARTIST_NAME = "artistName";
 
     public TracksAdapter(List<Track> tracks) {
         mTracks = tracks;
@@ -43,17 +38,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     @Override
     public void onBindViewHolder(TrackViewHolder holder, int position) {
         holder.bindItem(mTracks.get(position));
-
     }
-
-//    // TODO: Not sure if this is doing anything helpful. Remove?
-//    @Override
-//    public void onViewRecycled(TrackViewHolder holder) {
-//
-//        Picasso.with(mContext)
-//                .cancelRequest(holder.mArtistImageView);
-//        super.onViewRecycled(holder);
-//    }
 
     @Override
     public int getItemCount() {
@@ -89,10 +74,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
         @Override
         public void onClick(View view) {
-//            Intent intent = new Intent(mContext, TopTracksActivity.class);
-//            intent.putExtra(ARTIST_NAME, mArtistName);
-//            intent.putExtra(SPOTIFY_ID, mSpotifyId);
-//            mContext.startActivity(intent);
+            // Use in part 2
         }
     }
 }

@@ -1,66 +1,62 @@
 package me.jordancarlson.spotifystreamer;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.List;
+import java.util.Arrays;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
+import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
 /**
  * Main activity, contains the search and list of results for artists.
  */
 public class ArtistSearchActivity extends AppCompatActivity {
 
+    private static final String ARTIST_LIST = "artistList";
     @InjectView(R.id.artistRecyclerView) RecyclerView mRecyclerView;
     @InjectView(R.id.searchEditText) EditText mSearchEditText;
+    private ParcelableArtist[] mArtists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_search);
         ButterKnife.inject(this);
-        initToolbar();
-
-        mRecyclerView.setAdapter(null);
+        if (savedInstanceState != null) {
+            Parcelable[] parcelable = savedInstanceState.getParcelableArray(ARTIST_LIST);
+            ArtistAdapter adapter = null;
+            if (parcelable != null) {
+                mArtists = Arrays.copyOf(parcelable, parcelable.length, ParcelableArtist[].class);
+                adapter = new ArtistAdapter(mArtists);
+            }
+            mRecyclerView.setAdapter(adapter);
+        } else {
+            mRecyclerView.setAdapter(null);
+        }
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(ArtistSearchActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        mSearchEditText.setImeActionLabel("Search", EditorInfo.IME_ACTION_SEARCH);
+        ToolbarUtil.setupToolbar(this, getString(R.string.toolbar_title_search_activity), null , true);
+
         mSearchEditText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -76,29 +72,56 @@ public class ArtistSearchActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArray(ARTIST_LIST, mArtists);
 
-    private class FetchArtistsTask extends AsyncTask<String, Void, List<Artist>> {
+    }
+
+    private class FetchArtistsTask extends AsyncTask<String, Void, ParcelableArtist[]> {
+
+        private ProgressDialog dialog = new ProgressDialog(ArtistSearchActivity.this);
 
         @Override
-        protected List<Artist> doInBackground(String... strings) {
+        protected void onPreExecute() {
+            this.dialog.setMessage(getString(R.string.progress_dialog_message));
+            this.dialog.show();
+        }
+
+        @Override
+        protected ParcelableArtist[] doInBackground(String... strings) {
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
             ArtistsPager results = spotify.searchArtists(strings[0]);
-            List list = results.artists.items;
+
+            mArtists = new ParcelableArtist[results.artists.items.size()];
+            for (int i=0; i < results.artists.items.size(); i++) {
+                String imageUrl = "";
+                if (results.artists.items.get(i).images.size() != 0) {
+                    imageUrl = results.artists.items.get(i).images.get(0).url;
+                }
+                ParcelableArtist pa = new ParcelableArtist(results.artists.items.get(i).name, results.artists.items.get(i).id, imageUrl);
+                mArtists[i] = pa;
+            }
 
             if (results.artists.total == 0) {
                 LinearLayout view = (LinearLayout) findViewById(R.id.mainLayout);
-                Snackbar.make(view, "Sorry, We couldn't find any artists by that name.", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, getString(R.string.snackbar_no_artists), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
 
-            return list;
+            return mArtists;
         }
 
         @Override
-        protected void onPostExecute(List<Artist> artists) {
+        protected void onPostExecute(ParcelableArtist[] artists) {
             super.onPostExecute(artists);
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
 
             ArtistAdapter adapter = new ArtistAdapter(artists);
             mRecyclerView.setAdapter(adapter);
@@ -107,40 +130,4 @@ public class ArtistSearchActivity extends AppCompatActivity {
 
         }
     }
-
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Check if we're running on Android 5.0 or higher
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // Call some material design APIs here
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.setStatusBarColor(getResources().getColor(R.color.green_700));
-        }
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
 }
