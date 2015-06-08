@@ -1,6 +1,7 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Track;
+import me.jordancarlson.spotifystreamer.PlayerActivity;
 import me.jordancarlson.spotifystreamer.R;
 
 /**
@@ -20,11 +22,19 @@ import me.jordancarlson.spotifystreamer.R;
  */
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewHolder> {
 
-    private List<Track> mTracks;
+    public static final String ARTIST_NAME = "artistName";
+    public static final String ALBUM_NAME = "albumName";
+    public static final String ALBUM_IMAGE = "albumImage";
+    private static final String TRACK_NAME = "trackName";
+    private static final String TRACK_URI = "trackUri";
+    private static final String TRACK_DURATION = "trackDuration";
+    private final List<Track> mTracks;
     private Context mContext;
+    private String mArtistName;
 
-    public TracksAdapter(List<Track> tracks) {
+    public TracksAdapter(List<Track> tracks, String artistName) {
         mTracks = tracks;
+        mArtistName = artistName;
     }
 
     @Override
@@ -47,9 +57,10 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
     public class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        private TextView mTrackTextView;
-        private TextView mAlbumTextView;
-        private ImageView mAlbumImageView;
+        private final TextView mTrackTextView;
+        private final TextView mAlbumTextView;
+        private final ImageView mAlbumImageView;
+        private Track mTrack;
 
         public TrackViewHolder(View itemView) {
             super(itemView);
@@ -60,6 +71,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         }
 
         public void bindItem(Track track) {
+            mTrack = track;
             mTrackTextView.setText(track.name);
             mAlbumTextView.setText(track.album.name);
             if (track.album.images.size() != 0) {
@@ -75,6 +87,20 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         @Override
         public void onClick(View view) {
             // Use in part 2
+
+            if (mTrack.is_playable) {
+                Intent intent = new Intent(mContext, PlayerActivity.class);
+                intent.putExtra(ARTIST_NAME, mArtistName);
+                intent.putExtra(ALBUM_NAME, mTrack.album.name);
+                intent.putExtra(TRACK_NAME, mTrack.name);
+                intent.putExtra(TRACK_URI, mTrack.uri);
+                intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
+                if (mTrack.album.images.size() != 0) {
+                    intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
+                }
+
+                mContext.startActivity(intent);
+            }
         }
     }
 }

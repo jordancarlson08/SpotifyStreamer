@@ -21,7 +21,7 @@ import me.jordancarlson.spotifystreamer.TopTracksActivity;
  */
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {
 
-    private ParcelableArtist[] mArtists;
+    private final ParcelableArtist[] mArtists;
     private Context mContext;
     public static final String SPOTIFY_ID = "spotifyId";
     public static final String ARTIST_NAME = "artistName";
@@ -60,8 +60,8 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
     public class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        private TextView mArtistTextView;
-        private ImageView mArtistImageView;
+        private final TextView mArtistTextView;
+        private final ImageView mArtistImageView;
         private String mSpotifyId;
         private String mArtistName;
 

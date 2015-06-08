@@ -1,0 +1,101 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+
+              tools:context="me.jordancarlson.spotifystreamer.PlayerActivity">
+
+    <include layout="@layout/toolbar"
+             android:id="@+id/toolbar"/>
+
+    <TextView
+        tools:text="Artist Name"
+        android:id="@+id/playerArtistTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        tools:text="Album Name"
+        android:id="@+id/playerAlbumTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/playerArtistTextView"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageView
+        android:id="@+id/playerAlbumImageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:background="@color/amber_a400"
+        android:layout_below="@id/playerAlbumTextView"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        tools:text="Song Name"
+        android:id="@+id/playerTrackTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playerAlbumImageView"
+        android:layout_centerHorizontal="true"/>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_gravity="center_horizontal"
+        android:layout_below="@id/playerTrackTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_alignLeft="@+id/playerAlbumImageView"
+        android:layout_alignStart="@+id/playerAlbumImageView"
+        android:layout_alignRight="@+id/playerAlbumImageView"
+        android:layout_alignEnd="@id/playerAlbumImageView"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seekBar"
+        android:layout_alignLeft="@+id/playerAlbumImageView"
+        android:layout_alignStart="@+id/playerAlbumImageView"
+        android:layout_alignRight="@+id/playerAlbumImageView"
+        android:layout_alignEnd="@id/playerAlbumImageView">
+
+        <ImageButton
+            android:id="@+id/previousButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="@android:color/black"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"/>
+
+
+        <ImageButton
+            android:id="@+id/playButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"
+            android:layout_centerHorizontal="true"/>
+        <ImageButton
+            android:id="@+id/pauseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_pause"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"/>
+
+
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="@android:color/black"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"/>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -28,6 +28,7 @@ import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 public class TopTracksActivity extends AppCompatActivity {
 
     @InjectView(R.id.tracksRecyclerView) RecyclerView mRecyclerView;
+    private String mArtistName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +38,16 @@ public class TopTracksActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String spotifyId = intent.getStringExtra(ArtistAdapter.SPOTIFY_ID);
-        String artistName = intent.getStringExtra(ArtistAdapter.ARTIST_NAME);
+        mArtistName = intent.getStringExtra(ArtistAdapter.ARTIST_NAME);
 
-        ToolbarUtil.setupToolbar(this, getString(R.string.toolbar_title_top_tracks_activity), artistName, false);
+        ToolbarUtil.setupToolbar(this, getString(R.string.toolbar_title_top_tracks_activity), mArtistName, false);
 
         new FetchTopTracksTask().execute(spotifyId);
     }
 
     private class FetchTopTracksTask extends AsyncTask<String, Void, List<Track>> {
 
-        private ProgressDialog dialog = new ProgressDialog(TopTracksActivity.this);
+        private final ProgressDialog dialog = new ProgressDialog(TopTracksActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -84,7 +85,7 @@ public class TopTracksActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
 
-            TracksAdapter adapter = new TracksAdapter(tracksList);
+            TracksAdapter adapter = new TracksAdapter(tracksList, mArtistName);
             mRecyclerView.setAdapter(adapter);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(TopTracksActivity.this);
             mRecyclerView.setLayoutManager(layoutManager);

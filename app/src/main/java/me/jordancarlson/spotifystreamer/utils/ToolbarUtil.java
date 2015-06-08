@@ -10,7 +10,7 @@ import android.view.WindowManager;
 import me.jordancarlson.spotifystreamer.R;
 
 /**
- * Created by jcarlson on 5/21/15.
+ * Utility class that contains methods to reduce amount of duplicate code surrounding the Toolbar.
  */
 public class ToolbarUtil {
 
@@ -37,7 +37,6 @@ public class ToolbarUtil {
         if (!isHome) {
             try {
                 activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
             } catch (NullPointerException e) {
                 e.printStackTrace();
             }

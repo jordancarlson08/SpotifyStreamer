@@ -81,7 +81,7 @@ public class ArtistSearchActivity extends AppCompatActivity {
 
     private class FetchArtistsTask extends AsyncTask<String, Void, ParcelableArtist[]> {
 
-        private ProgressDialog dialog = new ProgressDialog(ArtistSearchActivity.this);
+        private final ProgressDialog dialog = new ProgressDialog(ArtistSearchActivity.this);
 
         @Override
         protected void onPreExecute() {
