@@ -3,6 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
+              android:id="@+id/topTracksLayout"
               tools:context="me.jordancarlson.spotifystreamer.TopTracksActivity">
 
     <include layout="@layout/toolbar"
@@ -16,11 +17,11 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:orientation="vertical">
 
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:id="@+id/tracksRecyclerView"-->
-            <!--/>-->
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/tracksRecyclerView"
+            />
 
     </LinearLayout>
 

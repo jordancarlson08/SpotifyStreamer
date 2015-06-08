@@ -65,7 +65,6 @@ public class ArtistSearchActivity extends AppCompatActivity {
         mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-
                 InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
                 String searchTerm = mSearchEditText.getText().toString();
