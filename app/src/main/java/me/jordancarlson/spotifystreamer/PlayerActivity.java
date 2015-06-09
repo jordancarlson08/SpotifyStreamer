@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -22,10 +23,11 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
+import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
 import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements PlayerFragment.OnFragmentInteractionListener{
 
     @InjectView(R.id.playerArtistTextView) TextView mArtistTextView;
     @InjectView(R.id.playerAlbumTextView) TextView mAlbumTextView;
@@ -46,56 +48,63 @@ public class PlayerActivity extends AppCompatActivity {
         ButterKnife.inject(this);
         Intent intent = getIntent();
 
-        ToolbarUtil.setupToolbar(this, "Test Artist", null, false);
+        // check if args are empty
 
-        mArtistTextView.setText(intent.getStringExtra(TracksAdapter.ARTIST_NAME));
-        mAlbumTextView.setText(intent.getStringExtra(TracksAdapter.ALBUM_NAME));
-        mTrackTextView.setText(intent.getStringExtra(TracksAdapter.TRACK_NAME));
+            ToolbarUtil.setupToolbar(this, "Test Artist", null, false);
 
-        if (!TextUtils.isEmpty(intent.getStringExtra(TracksAdapter.ALBUM_IMAGE))) {
-            Picasso.with(this)
-                    .load(intent.getStringExtra(TracksAdapter.ALBUM_IMAGE))
-                    .fit()
-                    .centerCrop()
-                    .into(mAlbumImageView);
-        }
+            mArtistTextView.setText(intent.getStringExtra(TracksAdapter.ARTIST_NAME));
+            mAlbumTextView.setText(intent.getStringExtra(TracksAdapter.ALBUM_NAME));
+            mTrackTextView.setText(intent.getStringExtra(TracksAdapter.TRACK_NAME));
 
-        String trackUrl = intent.getStringExtra(TracksAdapter.TRACK_URL);
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int position, boolean isFromUser) {
-                if (isFromUser) {
-                    mMediaPlayer.seekTo(position);
-                }
+            if (!TextUtils.isEmpty(intent.getStringExtra(TracksAdapter.ALBUM_IMAGE))) {
+                Picasso.with(this)
+                        .load(intent.getStringExtra(TracksAdapter.ALBUM_IMAGE))
+                        .fit()
+                        .centerCrop()
+                        .into(mAlbumImageView);
             }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
 
-        try {
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(trackUrl);
-            mMediaPlayer.prepareAsync();
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage(getString(R.string.progress_dialog_message));
-            progressDialog.show();
-            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            String trackUrl = intent.getStringExtra(TracksAdapter.TRACK_URL);
+            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    progressDialog.dismiss();
-                    mMediaPlayer.start();
-                    mPlay.setVisibility(View.GONE);
-                    mPause.setVisibility(View.VISIBLE);
-                    mSeekBar.setMax(mMediaPlayer.getDuration());
-                    updateSeekBar();
+                public void onProgressChanged(SeekBar seekBar, int position, boolean isFromUser) {
+                    if (isFromUser) {
+                        mMediaPlayer.seekTo(position);
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+            try {
+                mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setDataSource(trackUrl);
+                mMediaPlayer.prepareAsync();
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage(getString(R.string.progress_dialog_message));
+                progressDialog.show();
+                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+                        progressDialog.dismiss();
+                        mMediaPlayer.start();
+                        mPlay.setVisibility(View.GONE);
+                        mPause.setVisibility(View.VISIBLE);
+                        mSeekBar.setMax(mMediaPlayer.getDuration());
+                        updateSeekBar();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
     }
 
     Runnable run = new Runnable() {
@@ -138,4 +147,8 @@ public class PlayerActivity extends AppCompatActivity {
         mPause.setVisibility(View.GONE);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }

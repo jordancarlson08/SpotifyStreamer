@@ -2,12 +2,14 @@ package me.jordancarlson.spotifystreamer;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import java.util.HashMap;
@@ -22,10 +24,12 @@ import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
 import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
+import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
+import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
 
-public class TopTracksActivity extends AppCompatActivity {
+public class TopTracksActivity extends AppCompatActivity implements PlayerFragment.OnFragmentInteractionListener {
 
     @InjectView(R.id.tracksRecyclerView) RecyclerView mRecyclerView;
     private String mArtistName;
@@ -43,6 +47,25 @@ public class TopTracksActivity extends AppCompatActivity {
         ToolbarUtil.setupToolbar(this, getString(R.string.toolbar_title_top_tracks_activity), mArtistName, false);
 
         new FetchTopTracksTask().execute(spotifyId);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id == android.R.id.home){
+            super.onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
     private class FetchTopTracksTask extends AsyncTask<String, Void, List<Track>> {

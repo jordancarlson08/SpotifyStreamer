@@ -2,6 +2,8 @@ package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,8 @@ import java.util.List;
 import kaaes.spotify.webapi.android.models.Track;
 import me.jordancarlson.spotifystreamer.PlayerActivity;
 import me.jordancarlson.spotifystreamer.R;
+import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
+import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 
 /**
  * Custom adapter for the recycler view of Tracks returned by the Spotify API.
@@ -57,6 +61,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
     public class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
+        private static final String PLAYER_FRAG_TAG = "PLAYERFRAG";
         private final TextView mTrackTextView;
         private final TextView mAlbumTextView;
         private final ImageView mAlbumImageView;
@@ -86,18 +91,36 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
         @Override
         public void onClick(View view) {
-            // Use in part 2
-            Intent intent = new Intent(mContext, PlayerActivity.class);
-            intent.putExtra(ARTIST_NAME, mArtistName);
-            intent.putExtra(ALBUM_NAME, mTrack.album.name);
-            intent.putExtra(TRACK_NAME, mTrack.name);
-            intent.putExtra(TRACK_URL, mTrack.preview_url);
-            intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
+
+            String albumImageUrl = "";
             if (mTrack.album.images.size() != 0) {
-                intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
+                albumImageUrl = mTrack.album.images.get(0).url;
             }
 
-            mContext.startActivity(intent);
+            FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
+            PlayerFragment fragment = PlayerFragment.newInstance(mArtistName, mTrack.album.name, mTrack.name, mTrack.preview_url, mTrack.duration_ms, albumImageUrl);
+
+            if (mContext.getResources().getBoolean(R.bool.isTablet)) {
+
+                fragment.show(fragmentManager, "dialog");
+
+            } else {
+                ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, fragment, PLAYER_FRAG_TAG)
+                        .commit();
+            }
+
+//            Intent intent = new Intent(mContext, PlayerActivity.class);
+//            intent.putExtra(ARTIST_NAME, mArtistName);
+//            intent.putExtra(ALBUM_NAME, mTrack.album.name);
+//            intent.putExtra(TRACK_NAME, mTrack.name);
+//            intent.putExtra(TRACK_URL, mTrack.preview_url);
+//            intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
+//            if (mTrack.album.images.size() != 0) {
+//                intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
+//            }
+//
+//            mContext.startActivity(intent);
 
         }
     }
