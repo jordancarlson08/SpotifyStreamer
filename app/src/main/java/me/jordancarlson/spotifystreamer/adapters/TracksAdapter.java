@@ -25,9 +25,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     public static final String ARTIST_NAME = "artistName";
     public static final String ALBUM_NAME = "albumName";
     public static final String ALBUM_IMAGE = "albumImage";
-    private static final String TRACK_NAME = "trackName";
-    private static final String TRACK_URI = "trackUri";
-    private static final String TRACK_DURATION = "trackDuration";
+    public static final String TRACK_NAME = "trackName";
+    public static final String TRACK_URL = "trackUrl";
+    public static final String TRACK_DURATION = "trackDuration";
     private final List<Track> mTracks;
     private Context mContext;
     private String mArtistName;
@@ -87,20 +87,18 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         @Override
         public void onClick(View view) {
             // Use in part 2
-
-            if (mTrack.is_playable) {
-                Intent intent = new Intent(mContext, PlayerActivity.class);
-                intent.putExtra(ARTIST_NAME, mArtistName);
-                intent.putExtra(ALBUM_NAME, mTrack.album.name);
-                intent.putExtra(TRACK_NAME, mTrack.name);
-                intent.putExtra(TRACK_URI, mTrack.uri);
-                intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
-                if (mTrack.album.images.size() != 0) {
-                    intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
-                }
-
-                mContext.startActivity(intent);
+            Intent intent = new Intent(mContext, PlayerActivity.class);
+            intent.putExtra(ARTIST_NAME, mArtistName);
+            intent.putExtra(ALBUM_NAME, mTrack.album.name);
+            intent.putExtra(TRACK_NAME, mTrack.name);
+            intent.putExtra(TRACK_URL, mTrack.preview_url);
+            intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
+            if (mTrack.album.images.size() != 0) {
+                intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
             }
+
+            mContext.startActivity(intent);
+
         }
     }
 }
