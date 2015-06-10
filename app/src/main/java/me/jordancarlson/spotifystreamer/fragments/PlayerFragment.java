@@ -2,22 +2,24 @@ package me.jordancarlson.spotifystreamer.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -30,8 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import me.jordancarlson.spotifystreamer.R;
-import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
-import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
+import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -59,6 +60,8 @@ public class PlayerFragment extends DialogFragment {
     @InjectView(R.id.seekBar) SeekBar mSeekBar;
     @InjectView(R.id.playerTimeRemaining) TextView mTimeRemainingTextView;
     @InjectView(R.id.playerTimeElapsed) TextView mTimeElapsedTextView;
+    @InjectView(R.id.player_toolbar) Toolbar mToolbar;
+    @InjectView(R.id.player_root_layout) RelativeLayout mRootLayout;
     private MediaPlayer mMediaPlayer;
     private Handler mHandler = new Handler();
 
@@ -69,22 +72,34 @@ public class PlayerFragment extends DialogFragment {
     private String mTrackUrl;
     private long mTrackDur;
     private String mAlbumImage;
+    private boolean mHideToolbar;
 
     private OnFragmentInteractionListener mListener;
 
 
-    public static PlayerFragment newInstance(String artistName, String albumName, String trackName, String trackUrl, long trackDur, String albumImageUrl) {
-        PlayerFragment fragment = new PlayerFragment();
-        Bundle args = new Bundle();
-        args.putString(ARTIST_NAME, artistName);
-        args.putString(ALBUM_NAME, albumName);
-        args.putString(TRACK_NAME, trackName);
-        args.putString(TRACK_URL, trackUrl);
-        args.putLong(TRACK_DUR, trackDur);
-        args.putString(ALBUM_IMAGE, albumImageUrl);
-        fragment.setArguments(args);
-        return fragment;
-    }
+//    public static PlayerFragment newInstance(String artistName, String albumName, String trackName, String trackUrl, long trackDur, String albumImageUrl) {
+//        PlayerFragment fragment = new PlayerFragment();
+//        Bundle args = new Bundle();
+//        args.putString(ARTIST_NAME, artistName);
+//        args.putString(ALBUM_NAME, albumName);
+//        args.putString(TRACK_NAME, trackName);
+//        args.putString(TRACK_URL, trackUrl);
+//        args.putLong(TRACK_DUR, trackDur);
+//        args.putString(ALBUM_IMAGE, albumImageUrl);
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
+public static PlayerFragment newInstance(ParcelableTrack track) {
+    PlayerFragment fragment = new PlayerFragment();
+    Bundle args = new Bundle();
+    args.putString(ARTIST_NAME, track.getArtistName());
+    args.putString(ALBUM_NAME, track.getAlbumName());
+    args.putString(TRACK_NAME, track.getTrackName());
+    args.putString(TRACK_URL, track.getTrackUrl());
+    args.putString(ALBUM_IMAGE, track.getAlbumImage());
+    fragment.setArguments(args);
+    return fragment;
+}
 
     public PlayerFragment() {
         // Required empty public constructor
@@ -98,7 +113,6 @@ public class PlayerFragment extends DialogFragment {
             mAlbumName = getArguments().getString(ALBUM_NAME);
             mTrackName = getArguments().getString(TRACK_NAME);
             mTrackUrl = getArguments().getString(TRACK_URL);
-            mTrackDur = getArguments().getLong(TRACK_DUR);
             mAlbumImage = getArguments().getString(ALBUM_IMAGE);
         }
     }
@@ -109,7 +123,20 @@ public class PlayerFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, view);
 
-        // check if args are empty
+        // Hide Toolbar if tablet
+        if (mHideToolbar) {
+            mToolbar.setVisibility(View.GONE);
+        } else {
+            mRootLayout.getLayoutParams().height = RelativeLayout.LayoutParams.MATCH_PARENT;
+            ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
+            mToolbar.setTitle(getString(R.string.toolbar_title_search_activity));
+            try {
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         mArtistTextView.setText(mAlbumName);
         mAlbumTextView.setText(mAlbumName);
@@ -206,10 +233,19 @@ public class PlayerFragment extends DialogFragment {
         mPlay.setVisibility(View.VISIBLE);
         mPause.setVisibility(View.GONE);
     }
+    @OnClick(R.id.previousButton) public void onPreviousClicked() {
+        mMediaPlayer.stop();
+        //previous song
+    }
+    @OnClick(R.id.nextButton) public void onNextClicked() {
+        mMediaPlayer.stop();
+        // next song
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mHideToolbar = true;
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         return dialog;

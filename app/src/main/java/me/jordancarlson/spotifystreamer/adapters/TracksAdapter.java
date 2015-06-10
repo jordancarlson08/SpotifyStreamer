@@ -20,6 +20,7 @@ import me.jordancarlson.spotifystreamer.PlayerActivity;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
 import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
+import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 
 /**
  * Custom adapter for the recycler view of Tracks returned by the Spotify API.
@@ -31,14 +32,13 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     public static final String ALBUM_IMAGE = "albumImage";
     public static final String TRACK_NAME = "trackName";
     public static final String TRACK_URL = "trackUrl";
-    public static final String TRACK_DURATION = "trackDuration";
-    private final List<Track> mTracks;
+    private final ParcelableTrack[] mTracks;
     private Context mContext;
     private String mArtistName;
 
-    public TracksAdapter(List<Track> tracks, String artistName) {
+    public TracksAdapter(ParcelableTrack[] tracks) {
         mTracks = tracks;
-        mArtistName = artistName;
+        mArtistName = tracks[0].getArtistName();
     }
 
     @Override
@@ -51,12 +51,12 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
     @Override
     public void onBindViewHolder(TrackViewHolder holder, int position) {
-        holder.bindItem(mTracks.get(position));
+        holder.bindItem(mTracks[position]);
     }
 
     @Override
     public int getItemCount() {
-        return mTracks.size();
+        return mTracks.length;
     }
 
     public class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -65,7 +65,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         private final TextView mTrackTextView;
         private final TextView mAlbumTextView;
         private final ImageView mAlbumImageView;
-        private Track mTrack;
+        private ParcelableTrack mTrack;
 
         public TrackViewHolder(View itemView) {
             super(itemView);
@@ -75,30 +75,29 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
             itemView.setOnClickListener(this);
         }
 
-        public void bindItem(Track track) {
+        public void bindItem(ParcelableTrack track) {
             mTrack = track;
-            mTrackTextView.setText(track.name);
-            mAlbumTextView.setText(track.album.name);
-            if (track.album.images.size() != 0) {
-                String url = track.album.images.get(0).url;
-                Picasso.with(mContext)
-                        .load(url)
-                        .fit()
-                        .centerCrop()
-                        .into(mAlbumImageView);
-            }
+            mTrackTextView.setText(track.getTrackName());
+            mAlbumTextView.setText(track.getAlbumName());
+            Picasso.with(mContext)
+                    .load(track.getAlbumImage())
+                    .fit()
+                    .centerCrop()
+                    .into(mAlbumImageView);
+
         }
 
         @Override
         public void onClick(View view) {
 
-            String albumImageUrl = "";
-            if (mTrack.album.images.size() != 0) {
-                albumImageUrl = mTrack.album.images.get(0).url;
-            }
+//            String albumImageUrl = mTrack.getAlbumImage();
+
 
             FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
-            PlayerFragment fragment = PlayerFragment.newInstance(mArtistName, mTrack.album.name, mTrack.name, mTrack.preview_url, mTrack.duration_ms, albumImageUrl);
+
+//            PlayerFragment fragment = PlayerFragment.newInstance(mArtistName, mTrack.album.name, mTrack.name, mTrack.preview_url, mTrack.duration_ms, albumImageUrl);
+
+            PlayerFragment fragment = PlayerFragment.newInstance(mTrack);
 
             if (mContext.getResources().getBoolean(R.bool.isTablet)) {
 

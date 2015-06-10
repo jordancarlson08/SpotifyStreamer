@@ -6,15 +6,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
 import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
+import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,11 +46,13 @@ public class TopTracksFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARTIST_NAME = "param1";
     private static final String SPOTIFY_ID = "param2";
+    private static final String TRACK_LIST = "trackList";
     @InjectView(R.id.tracksRecyclerView) RecyclerView mRecyclerView;
 
     // TODO: Rename and change types of parameters
     private String mArtistName;
     private String mSpotifyId;
+    private ParcelableTrack[] mTracks;
 
     private OnFragmentInteractionListener mListener;
 
@@ -87,22 +93,36 @@ public class TopTracksFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_top_tracks, container, false);
         ButterKnife.inject(this, view);
 
-        Intent intent = getActivity().getIntent();
-        if (intent != null && intent.getData() != null) {
-            String spotifyId = intent.getStringExtra(ArtistAdapter.SPOTIFY_ID);
-            mArtistName = intent.getStringExtra(ArtistAdapter.ARTIST_NAME);
-
-            new FetchTopTracksTask().execute(spotifyId);
-        } else if (getArguments() != null) {
-            Bundle args = getArguments();
-            String spotifyId = args.getString(SPOTIFY_ID);
-            mArtistName = args.getString(ARTIST_NAME);
-
-            new FetchTopTracksTask().execute(spotifyId);
+        if (savedInstanceState != null) {
+            Parcelable[] parcelable = savedInstanceState.getParcelableArray(TRACK_LIST);
+            TracksAdapter adapter = null;
+            if (parcelable != null) {
+                mTracks = Arrays.copyOf(parcelable, parcelable.length, ParcelableTrack[].class);
+                adapter = new TracksAdapter(mTracks);
+            }
+            mRecyclerView.setAdapter(adapter);
+        } else {
+            mRecyclerView.setAdapter(null);
         }
-        mRecyclerView.setAdapter(null);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
+
+        Intent intent = getActivity().getIntent();
+        if (mTracks == null) {
+            if (intent != null && intent.getData() != null) {
+                String spotifyId = intent.getStringExtra(ArtistAdapter.SPOTIFY_ID);
+                mArtistName = intent.getStringExtra(ArtistAdapter.ARTIST_NAME);
+
+                new FetchTopTracksTask().execute(spotifyId);
+            } else if (getArguments() != null) {
+                Bundle args = getArguments();
+                String spotifyId = args.getString(SPOTIFY_ID);
+                mArtistName = args.getString(ARTIST_NAME);
+
+                new FetchTopTracksTask().execute(spotifyId);
+            }
+        }
+
 
         return view;
     }
@@ -131,6 +151,12 @@ public class TopTracksFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArray(TRACK_LIST, mTracks);
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -147,7 +173,7 @@ public class TopTracksFragment extends Fragment {
     }
 
 
-    private class FetchTopTracksTask extends AsyncTask<String, Void, List<Track>> {
+    private class FetchTopTracksTask extends AsyncTask<String, Void, ParcelableTrack[]> {
 
         private final ProgressDialog dialog = new ProgressDialog(getActivity());
 
@@ -158,7 +184,7 @@ public class TopTracksFragment extends Fragment {
         }
 
         @Override
-        protected List<Track> doInBackground(String... strings) {
+        protected ParcelableTrack[] doInBackground(String... strings) {
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
@@ -168,26 +194,41 @@ public class TopTracksFragment extends Fragment {
 
             Tracks results = spotify.getArtistTopTrack(strings[0], params);
 
-            List<Track> tracksList = results.tracks;
+            mTracks = new ParcelableTrack[results.tracks.size()];
+            for (int i=0; i<results.tracks.size(); i++) {
 
-            if (tracksList.size() == 0) {
+                Track track = results.tracks.get(i);
+
+                String albumName = track.album.name;
+                String albumImage = null;
+                if (!TextUtils.isEmpty(track.album.images.get(0).url)) {
+                    albumImage = track.album.images.get(0).url;
+                }
+                String trackName = track.name;
+                String trackUrl = track.preview_url;
+                ParcelableTrack pt = new ParcelableTrack(mArtistName, albumName, albumImage, trackName, trackUrl);
+
+                mTracks[i] = pt;
+            }
+
+            if (mTracks.length == 0) {
                 LinearLayout view = (LinearLayout) getActivity().findViewById(R.id.topTracksLayout);
                 Snackbar.make(view, getString(R.string.snackbar_no_tracks), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
 
-            return tracksList;
+            return mTracks;
         }
 
         @Override
-        protected void onPostExecute(List<Track> tracksList) {
-            super.onPostExecute(tracksList);
+        protected void onPostExecute(ParcelableTrack[] tracks) {
+            super.onPostExecute(tracks);
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
-            TracksAdapter adapter = new TracksAdapter(tracksList, mArtistName);
+            TracksAdapter adapter = new TracksAdapter(tracks);
             mRecyclerView.setAdapter(adapter);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mRecyclerView.setLayoutManager(layoutManager);

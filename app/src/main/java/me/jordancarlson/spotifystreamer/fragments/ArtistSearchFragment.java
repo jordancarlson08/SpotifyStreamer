@@ -29,19 +29,10 @@ import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import me.jordancarlson.spotifystreamer.ParcelableArtist;
+import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
-import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ArtistSearchFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ArtistSearchFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ArtistSearchFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

@@ -1,4 +1,4 @@
-package me.jordancarlson.spotifystreamer;
+package me.jordancarlson.spotifystreamer.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

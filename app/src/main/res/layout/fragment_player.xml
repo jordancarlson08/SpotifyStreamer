@@ -1,15 +1,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:id="@+id/player_root_layout"
+                android:background="#ffeeeeee">
 
+    <include layout="@layout/toolbar"
+             android:id="@+id/player_toolbar"/>
 
     <TextView
         tools:text="Artist Name"
         android:id="@+id/playerArtistTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
+        android:layout_below="@+id/player_toolbar"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="5dp"
         android:textSize="16sp"
@@ -53,39 +57,38 @@
         android:layout_centerHorizontal="true"/>
 
     <TextView
-        tools:text="0:00"
+        android:text="0:00"
         android:id="@+id/playerTimeElapsed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"/>
 
     <TextView
-        tools:text="0:30"
+        android:text="0:30"
         android:id="@+id/playerTimeRemaining"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="25dp"
         android:layout_marginBottom="20dp"
+        android:layout_below="@+id/seekBar"
         android:layout_alignLeft="@+id/playerAlbumImageView"
         android:layout_alignStart="@+id/playerAlbumImageView"
         android:layout_alignRight="@+id/playerAlbumImageView"
         android:layout_alignEnd="@id/playerAlbumImageView"
-        android:layout_alignParentBottom="true">
+        android:layout_centerHorizontal="true">
 
         <ImageView
             android:id="@+id/previousButton"

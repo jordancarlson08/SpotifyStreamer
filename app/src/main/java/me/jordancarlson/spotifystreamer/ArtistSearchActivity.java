@@ -1,35 +1,17 @@
 package me.jordancarlson.spotifystreamer;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import java.util.Arrays;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
 import me.jordancarlson.spotifystreamer.fragments.ArtistSearchFragment;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
 import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
+import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
 /**
