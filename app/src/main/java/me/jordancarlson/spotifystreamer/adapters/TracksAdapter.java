@@ -1,30 +1,19 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.media.MediaPlayer;
-import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Track;
-import me.jordancarlson.spotifystreamer.PlayerActivity;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
-import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 
 /**
@@ -40,12 +29,11 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     private final ParcelableTrack[] mTracks;
 
     private Context mContext;
-    private String mArtistName;
 
     public TracksAdapter(ParcelableTrack[] tracks) {
         mTracks = tracks;
         if (tracks.length > 0) {
-            mArtistName = tracks[0].getArtistName();
+            String artistName = tracks[0].getArtistName();
         }
     }
 
@@ -115,18 +103,6 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
                         .replace(android.R.id.content, fragment, PLAYER_FRAG_TAG)
                         .commit();
             }
-
-//            Intent intent = new Intent(mContext, PlayerActivity.class);
-//            intent.putExtra(ARTIST_NAME, mArtistName);
-//            intent.putExtra(ALBUM_NAME, mTrack.album.name);
-//            intent.putExtra(TRACK_NAME, mTrack.name);
-//            intent.putExtra(TRACK_URL, mTrack.preview_url);
-//            intent.putExtra(TRACK_DURATION, mTrack.duration_ms);
-//            if (mTrack.album.images.size() != 0) {
-//                intent.putExtra(ALBUM_IMAGE, mTrack.album.images.get(0).url);
-//            }
-//
-//            mContext.startActivity(intent);
 
         }
     }

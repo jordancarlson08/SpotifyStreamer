@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -68,14 +67,9 @@ public class PlayerFragment extends DialogFragment {
     @InjectView(R.id.player_toolbar) Toolbar mToolbar;
     @InjectView(R.id.player_root_layout) RelativeLayout mRootLayout;
     private MediaPlayer mMediaPlayer;
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
 
-    private String mArtistName;
-    private String mAlbumName;
-    private String mTrackName;
-    private String mTrackUrl;
-    private String mAlbumImage;
     private boolean mHideToolbar;
 
     private OnFragmentInteractionListener mListener;
@@ -107,11 +101,11 @@ public class PlayerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mArtistName = getArguments().getString(ARTIST_NAME);
-            mAlbumName = getArguments().getString(ALBUM_NAME);
-            mTrackName = getArguments().getString(TRACK_NAME);
-            mTrackUrl = getArguments().getString(TRACK_URL);
-            mAlbumImage = getArguments().getString(ALBUM_IMAGE);
+            String artistName = getArguments().getString(ARTIST_NAME);
+            String albumName = getArguments().getString(ALBUM_NAME);
+            String trackName = getArguments().getString(TRACK_NAME);
+            String trackUrl = getArguments().getString(TRACK_URL);
+            String albumImage = getArguments().getString(ALBUM_IMAGE);
             Parcelable[] parcelableArray = getArguments().getParcelableArray(TRACKS);
             mTracks = Arrays.copyOf(parcelableArray, parcelableArray.length, ParcelableTrack[].class);
             mPosition = getArguments().getInt(POSITION);
@@ -203,7 +197,7 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
-    Runnable run = new Runnable() {
+    final Runnable run = new Runnable() {
         @Override
         public void run() {
             updateSeekBar();
@@ -320,7 +314,7 @@ public class PlayerFragment extends DialogFragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek);
+        void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek);
     }
 
 }

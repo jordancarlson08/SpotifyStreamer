@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -29,9 +28,9 @@ import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
+import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 
 public class ArtistSearchFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -43,10 +42,6 @@ public class ArtistSearchFragment extends Fragment {
     @InjectView(R.id.artistRecyclerView) RecyclerView mRecyclerView;
     @InjectView(R.id.searchEditText) EditText mSearchEditText;
     private ParcelableArtist[] mArtists;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -76,8 +71,8 @@ public class ArtistSearchFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            String param1 = getArguments().getString(ARG_PARAM1);
+            String param2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -122,7 +117,7 @@ public class ArtistSearchFragment extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed() {
         if (mListener != null) {
             mListener.onArtistSelected(mArtists, mRecyclerView);
         }
@@ -163,8 +158,8 @@ public class ArtistSearchFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onArtistSelected(ParcelableArtist[] artists, RecyclerView recyclerView);
-        public void onNewSearch(String search);
+        void onArtistSelected(ParcelableArtist[] artists, RecyclerView recyclerView);
+        void onNewSearch(String search);
     }
 
     private class FetchArtistsTask extends AsyncTask<String, Void, ParcelableArtist[]> {

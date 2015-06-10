@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +39,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerFragment.
     @InjectView(R.id.playerTimeRemaining) TextView mTimeRemainingTextView;
     @InjectView(R.id.playerTimeElapsed) TextView mTimeElapsedTextView;
     private MediaPlayer mMediaPlayer;
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +107,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerFragment.
 
     }
 
-    Runnable run = new Runnable() {
+    final Runnable run = new Runnable() {
         @Override
         public void run() {
             updateSeekBar();

@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by Jordan on 6/9/2015.
+ * Parcelable object for storing relevant track data
  */
 public class ParcelableTrack implements Parcelable {
 

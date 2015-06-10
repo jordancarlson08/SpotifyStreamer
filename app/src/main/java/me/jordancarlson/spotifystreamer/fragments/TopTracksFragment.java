@@ -3,7 +3,6 @@ package me.jordancarlson.spotifystreamer.fragments;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -11,7 +10,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,6 @@ import android.widget.LinearLayout;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.ButterKnife;
@@ -51,7 +48,6 @@ public class TopTracksFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String mArtistName;
-    private String mSpotifyId;
     private ParcelableTrack[] mTracks;
 
     private OnFragmentInteractionListener mListener;
@@ -83,7 +79,7 @@ public class TopTracksFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mArtistName = getArguments().getString(ARTIST_NAME);
-            mSpotifyId = getArguments().getString(SPOTIFY_ID);
+            String spotifyId = getArguments().getString(SPOTIFY_ID);
         }
     }
 
@@ -169,7 +165,7 @@ public class TopTracksFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onArtistSelected(String artistName);
+        void onArtistSelected(String artistName);
     }
 
 

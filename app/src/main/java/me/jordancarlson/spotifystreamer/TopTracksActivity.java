@@ -2,7 +2,6 @@ package me.jordancarlson.spotifystreamer;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -10,14 +9,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.ButterKnife;
@@ -29,7 +25,6 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
 import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
-import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
