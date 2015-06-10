@@ -24,6 +24,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import me.jordancarlson.spotifystreamer.adapters.TracksAdapter;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
+import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 import me.jordancarlson.spotifystreamer.utils.ToolbarUtil;
 
 
@@ -148,7 +149,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerFragment.
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek) {
 
     }
 }

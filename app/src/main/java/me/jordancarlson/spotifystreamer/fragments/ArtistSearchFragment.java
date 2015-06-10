@@ -105,13 +105,17 @@ public class ArtistSearchFragment extends Fragment {
         mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
-                String searchTerm = mSearchEditText.getText().toString();
-                if (!TextUtils.isEmpty(searchTerm)) {
-                    new FetchArtistsTask().execute(searchTerm);
+                if(keyEvent == null || keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
+                    String searchTerm = mSearchEditText.getText().toString();
+                    if (!TextUtils.isEmpty(searchTerm)) {
+                        mListener.onNewSearch("Search: " + searchTerm);
+                        new FetchArtistsTask().execute(searchTerm);
+                    }
                 }
                 return true;
+
             }
         });
         return view;
@@ -160,6 +164,7 @@ public class ArtistSearchFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         public void onArtistSelected(ParcelableArtist[] artists, RecyclerView recyclerView);
+        public void onNewSearch(String search);
     }
 
     private class FetchArtistsTask extends AsyncTask<String, Void, ParcelableArtist[]> {
@@ -180,21 +185,22 @@ public class ArtistSearchFragment extends Fragment {
             ArtistsPager results = spotify.searchArtists(strings[0]);
 
             mArtists = new ParcelableArtist[results.artists.items.size()];
-            for (int i=0; i < results.artists.items.size(); i++) {
-                String imageUrl = "";
-                if (results.artists.items.get(i).images.size() != 0) {
-                    imageUrl = results.artists.items.get(i).images.get(0).url;
-                }
-                ParcelableArtist pa = new ParcelableArtist(results.artists.items.get(i).name, results.artists.items.get(i).id, imageUrl);
-                mArtists[i] = pa;
-            }
+            if (results.artists.total > 0) {
 
-            if (results.artists.total == 0) {
-                LinearLayout view = (LinearLayout) getActivity().findViewById(R.id.mainLayout);
-                Snackbar.make(view, getString(R.string.snackbar_no_artists), Snackbar.LENGTH_LONG)
+                for (int i = 0; i < results.artists.items.size(); i++) {
+                    String imageUrl = "";
+                    if (results.artists.items.get(i).images.size() != 0) {
+                        imageUrl = results.artists.items.get(i).images.get(0).url;
+                    }
+                    ParcelableArtist pa = new ParcelableArtist(results.artists.items.get(i).name, results.artists.items.get(i).id, imageUrl);
+                    mArtists[i] = pa;
+                }
+
+
+            } else {
+                Snackbar.make(getActivity().findViewById(android.R.id.content), getString(R.string.snackbar_no_artists), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-
             return mArtists;
         }
 
@@ -206,7 +212,10 @@ public class ArtistSearchFragment extends Fragment {
                 dialog.dismiss();
             }
 
-            ArtistAdapter adapter = new ArtistAdapter(artists);
+            ArtistAdapter adapter = null;
+            if (artists != null) {
+                adapter = new ArtistAdapter(artists);
+            }
             mRecyclerView.setAdapter(adapter);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mRecyclerView.setLayoutManager(layoutManager);

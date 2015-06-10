@@ -92,7 +92,7 @@ public class TopTracksActivity extends AppCompatActivity implements PlayerFragme
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek) {
 
     }
 
@@ -123,7 +123,7 @@ public class TopTracksActivity extends AppCompatActivity implements PlayerFragme
 
                 String albumName = track.album.name;
                 String albumImage = null;
-                if (!TextUtils.isEmpty(track.album.images.get(0).url)) {
+                if (track.album.images.size() > 0) {
                     albumImage = track.album.images.get(0).url;
                 }
                 String trackName = track.name;

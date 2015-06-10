@@ -128,9 +128,9 @@ public class TopTracksFragment extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(String artistName) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onArtistSelected(artistName);
         }
     }
 
@@ -169,7 +169,7 @@ public class TopTracksFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onArtistSelected(String artistName);
     }
 
 
@@ -201,7 +201,7 @@ public class TopTracksFragment extends Fragment {
 
                 String albumName = track.album.name;
                 String albumImage = null;
-                if (!TextUtils.isEmpty(track.album.images.get(0).url)) {
+                if (track.album.images.size() > 0) {
                     albumImage = track.album.images.get(0).url;
                 }
                 String trackName = track.name;
@@ -228,6 +228,7 @@ public class TopTracksFragment extends Fragment {
                 dialog.dismiss();
             }
 
+            mListener.onArtistSelected(mArtistName);
             TracksAdapter adapter = new TracksAdapter(tracks);
             mRecyclerView.setAdapter(adapter);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());

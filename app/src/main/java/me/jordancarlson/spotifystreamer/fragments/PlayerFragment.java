@@ -2,15 +2,17 @@ package me.jordancarlson.spotifystreamer.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -25,7 +27,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
@@ -33,6 +35,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
+import me.jordancarlson.spotifystreamer.utils.MediaPlayerSingleton;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,9 +50,11 @@ public class PlayerFragment extends DialogFragment {
     private static final String ARTIST_NAME = "artistName";
     private static final String ALBUM_NAME = "albumName";
     private static final String TRACK_NAME = "trackName";
-    private static final String TRACK_DUR = "trackDur";
     private static final String ALBUM_IMAGE = "albumImage";
     private static final String TRACK_URL = "trackUrl";
+    private static final String TRACKS = "tracks";
+    private static final String POSITION = "position";
+    private static final String SEEK = "seek";
 
     @InjectView(R.id.playerArtistTextView) TextView mArtistTextView;
     @InjectView(R.id.playerAlbumTextView) TextView mAlbumTextView;
@@ -70,33 +75,26 @@ public class PlayerFragment extends DialogFragment {
     private String mAlbumName;
     private String mTrackName;
     private String mTrackUrl;
-    private long mTrackDur;
     private String mAlbumImage;
     private boolean mHideToolbar;
 
     private OnFragmentInteractionListener mListener;
+    private ParcelableTrack[] mTracks;
+    private int mPosition;
+    private int mSeek;
 
-
-//    public static PlayerFragment newInstance(String artistName, String albumName, String trackName, String trackUrl, long trackDur, String albumImageUrl) {
-//        PlayerFragment fragment = new PlayerFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARTIST_NAME, artistName);
-//        args.putString(ALBUM_NAME, albumName);
-//        args.putString(TRACK_NAME, trackName);
-//        args.putString(TRACK_URL, trackUrl);
-//        args.putLong(TRACK_DUR, trackDur);
-//        args.putString(ALBUM_IMAGE, albumImageUrl);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-public static PlayerFragment newInstance(ParcelableTrack track) {
+    public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position, int seek) {
     PlayerFragment fragment = new PlayerFragment();
     Bundle args = new Bundle();
+    ParcelableTrack track = tracks[position];
     args.putString(ARTIST_NAME, track.getArtistName());
     args.putString(ALBUM_NAME, track.getAlbumName());
     args.putString(TRACK_NAME, track.getTrackName());
     args.putString(TRACK_URL, track.getTrackUrl());
     args.putString(ALBUM_IMAGE, track.getAlbumImage());
+    args.putParcelableArray(TRACKS, tracks);
+    args.putInt(SEEK, seek);
+    args.putInt(POSITION, position);
     fragment.setArguments(args);
     return fragment;
 }
@@ -114,6 +112,10 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
             mTrackName = getArguments().getString(TRACK_NAME);
             mTrackUrl = getArguments().getString(TRACK_URL);
             mAlbumImage = getArguments().getString(ALBUM_IMAGE);
+            Parcelable[] parcelableArray = getArguments().getParcelableArray(TRACKS);
+            mTracks = Arrays.copyOf(parcelableArray, parcelableArray.length, ParcelableTrack[].class);
+            mPosition = getArguments().getInt(POSITION);
+            mSeek = getArguments().getInt(SEEK);
         }
     }
 
@@ -137,20 +139,25 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
             }
         }
 
+        playTrack(mTracks[mPosition]);
 
-        mArtistTextView.setText(mAlbumName);
-        mAlbumTextView.setText(mAlbumName);
-        mTrackTextView.setText(mTrackName);
+        return view;
+    }
 
-        if (!TextUtils.isEmpty(mAlbumImage)) {
+    private void playTrack(ParcelableTrack track) {
+        mArtistTextView.setText(track.getArtistName());
+        mAlbumTextView.setText(track.getAlbumName());
+        mTrackTextView.setText(track.getTrackName());
+
+        if (!TextUtils.isEmpty(track.getAlbumImage())) {
             Picasso.with(getActivity())
-                    .load(mAlbumImage)
+                    .load(track.getAlbumImage())
                     .fit()
                     .centerCrop()
                     .into(mAlbumImageView);
         }
 
-        String trackUrl = mTrackUrl;
+        String trackUrl = track.getTrackUrl();
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int position, boolean isFromUser) {
@@ -169,7 +176,8 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
         });
 
         try {
-            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer = MediaPlayerSingleton.getInstance().getsMediaPlayer();
+            mMediaPlayer.reset();
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setDataSource(trackUrl);
             mMediaPlayer.prepareAsync();
@@ -180,6 +188,9 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     progressDialog.dismiss();
+                    if (mSeek > 0) {
+                        mMediaPlayer.seekTo(mSeek);
+                    }
                     mMediaPlayer.start();
                     mPlay.setVisibility(View.GONE);
                     mPause.setVisibility(View.VISIBLE);
@@ -187,11 +198,9 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
                     updateSeekBar();
                 }
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return view;
     }
 
     Runnable run = new Runnable() {
@@ -202,12 +211,15 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
     };
 
     public void updateSeekBar() {
-        mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
-        mHandler.postDelayed(run, 10);
-        String elapsed = formatElapsed(mMediaPlayer.getCurrentPosition());
-        String remaining = formatRemaining(mMediaPlayer.getDuration(), mMediaPlayer.getCurrentPosition());
-        mTimeElapsedTextView.setText(elapsed);
-        mTimeRemainingTextView.setText(remaining);
+        if (mMediaPlayer.isPlaying()) {
+            mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+            mSeek = mMediaPlayer.getCurrentPosition();
+            mHandler.postDelayed(run, 10);
+            String elapsed = formatElapsed(mMediaPlayer.getCurrentPosition());
+            String remaining = formatRemaining(mMediaPlayer.getDuration(), mMediaPlayer.getCurrentPosition());
+            mTimeElapsedTextView.setText(elapsed);
+            mTimeRemainingTextView.setText(remaining);
+        }
     }
 
     private String formatRemaining(int duration, int current) {
@@ -234,12 +246,33 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
         mPause.setVisibility(View.GONE);
     }
     @OnClick(R.id.previousButton) public void onPreviousClicked() {
-        mMediaPlayer.stop();
-        //previous song
+        mSeek = 0;
+        mPosition--;
+        if (mPosition >= 0) {
+            playTrack(mTracks[mPosition]);
+
+        } else {
+            mPosition = 9;
+            playTrack(mTracks[mPosition]);
+        }
     }
     @OnClick(R.id.nextButton) public void onNextClicked() {
-        mMediaPlayer.stop();
-        // next song
+        mSeek = 0;
+        mPosition++;
+        if (mPosition < mTracks.length) {
+            playTrack(mTracks[mPosition]);
+
+        } else {
+            mPosition = 0;
+            playTrack(mTracks[mPosition]);
+        }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        mListener.onFragmentHidden(mTracks, mPosition, mSeek);
+        mMediaPlayer.pause();
     }
 
     @NonNull
@@ -252,9 +285,9 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(ParcelableTrack[] tracks, int position, int seek) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentHidden(tracks, position, seek);
         }
     }
 
@@ -287,7 +320,7 @@ public static PlayerFragment newInstance(ParcelableTrack track) {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek);
     }
 
 }

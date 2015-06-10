@@ -16,4 +16,7 @@
         <item name="android:textColorPrimary">@color/actionbar_title_text</item>
     </style>
 
+    <style name="SearchListStyle">
+    </style>
+
 </resources>

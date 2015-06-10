@@ -1,15 +1,20 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -33,12 +38,15 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     public static final String TRACK_NAME = "trackName";
     public static final String TRACK_URL = "trackUrl";
     private final ParcelableTrack[] mTracks;
+
     private Context mContext;
     private String mArtistName;
 
     public TracksAdapter(ParcelableTrack[] tracks) {
         mTracks = tracks;
-        mArtistName = tracks[0].getArtistName();
+        if (tracks.length > 0) {
+            mArtistName = tracks[0].getArtistName();
+        }
     }
 
     @Override
@@ -49,9 +57,10 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         return new TrackViewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(TrackViewHolder holder, int position) {
-        holder.bindItem(mTracks[position]);
+        holder.bindItem(mTracks, position);
     }
 
     @Override
@@ -62,10 +71,12 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
     public class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private static final String PLAYER_FRAG_TAG = "PLAYERFRAG";
+        private static final String PLAYER_DIALOG_TAG = "PLAYERDIALOG";
         private final TextView mTrackTextView;
         private final TextView mAlbumTextView;
         private final ImageView mAlbumImageView;
         private ParcelableTrack mTrack;
+        private int mPosition;
 
         public TrackViewHolder(View itemView) {
             super(itemView);
@@ -75,8 +86,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
             itemView.setOnClickListener(this);
         }
 
-        public void bindItem(ParcelableTrack track) {
-            mTrack = track;
+        public void bindItem(ParcelableTrack[] tracks, int position) {
+            mPosition = position;
+            ParcelableTrack track = tracks[position];
             mTrackTextView.setText(track.getTrackName());
             mAlbumTextView.setText(track.getAlbumName());
             Picasso.with(mContext)
@@ -90,18 +102,13 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         @Override
         public void onClick(View view) {
 
-//            String albumImageUrl = mTrack.getAlbumImage();
-
-
             FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
 
-//            PlayerFragment fragment = PlayerFragment.newInstance(mArtistName, mTrack.album.name, mTrack.name, mTrack.preview_url, mTrack.duration_ms, albumImageUrl);
-
-            PlayerFragment fragment = PlayerFragment.newInstance(mTrack);
+            PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition, 0);
 
             if (mContext.getResources().getBoolean(R.bool.isTablet)) {
 
-                fragment.show(fragmentManager, "dialog");
+                fragment.show(fragmentManager, PLAYER_DIALOG_TAG);
 
             } else {
                 ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()

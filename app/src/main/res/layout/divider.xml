@@ -8,6 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:id="@+id/imageView"
-        android:background="#fdc1c1c1"/>
+        android:background="#ffc1c1c1"/>
 
 </LinearLayout>
