@@ -1,10 +1,10 @@
-package me.jordancarlson.spotifystreamer;
+package me.jordancarlson.spotifystreamer.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by Jordan on 6/7/2015.
+ * Parcelable object used for storing the artist name, Spotify Id, and image url.
  */
 public class ParcelableArtist implements Parcelable {
     private String mArtistName;

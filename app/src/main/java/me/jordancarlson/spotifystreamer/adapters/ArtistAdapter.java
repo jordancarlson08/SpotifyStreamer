@@ -2,6 +2,7 @@ package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -12,22 +13,28 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import me.jordancarlson.spotifystreamer.ParcelableArtist;
+import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.TopTracksActivity;
+import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 
 /**
  * Custom adapter for the recycler view of Artists returned by the Spotify API.
  */
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {
 
-    private ParcelableArtist[] mArtists;
+    private final ParcelableArtist[] mArtists;
+    private boolean mTwoPane;
     private Context mContext;
     public static final String SPOTIFY_ID = "spotifyId";
     public static final String ARTIST_NAME = "artistName";
 
     public ArtistAdapter(ParcelableArtist[] artists) {
         mArtists = artists;
+    }
+    public ArtistAdapter(ParcelableArtist[] artists, boolean isTwoPane){
+        mArtists = artists;
+        mTwoPane = isTwoPane;
     }
 
     @Override
@@ -58,12 +65,13 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
         return mArtists.length;
     }
 
-    public class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private TextView mArtistTextView;
-        private ImageView mArtistImageView;
+        private final TextView mArtistTextView;
+        private final ImageView mArtistImageView;
         private String mSpotifyId;
         private String mArtistName;
+        private static final String TOP_TRACK_FRAG_TAG = "TOPTRACKFRAG";
 
         public ArtistViewHolder(View itemView) {
             super(itemView);
@@ -87,10 +95,21 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent(mContext, TopTracksActivity.class);
-            intent.putExtra(ARTIST_NAME, mArtistName);
-            intent.putExtra(SPOTIFY_ID, mSpotifyId);
-            mContext.startActivity(intent);
+            if (mTwoPane) {
+                //Start Fragment
+                TopTracksFragment fragment = TopTracksFragment.newInstance(mArtistName, mSpotifyId);
+
+                ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_top_tracks_container, fragment, TOP_TRACK_FRAG_TAG)
+                        .commit();
+
+
+            } else {
+                Intent intent = new Intent(mContext, TopTracksActivity.class);
+                intent.putExtra(ARTIST_NAME, mArtistName);
+                intent.putExtra(SPOTIFY_ID, mSpotifyId);
+                mContext.startActivity(intent);
+            }
         }
     }
 }

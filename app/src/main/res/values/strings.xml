@@ -10,5 +10,11 @@
     <string name="progress_dialog_message">Please wait…</string>
     <string name="snackbar_no_tracks">Sorry, We couldn\'t find any tracks by that artist.</string>
     <string name="snackbar_no_artists">Sorry, We couldn\'t find any artists by that name.</string>
+    <string name="title_activity_player">PlayerActivity</string>
+
+
+    <string name="now_playing">Now Playing</string>
+    <string name="zero_seconds">0:00</string>
+    <string name="thirty_seconds">0:30</string>
 
 </resources>
