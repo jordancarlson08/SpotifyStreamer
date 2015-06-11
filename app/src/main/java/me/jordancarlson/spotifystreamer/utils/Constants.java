@@ -6,4 +6,5 @@ package me.jordancarlson.spotifystreamer.utils;
 public class Constants {
     public static final String TRACKS = "tracks";
     public static final String POSITION = "position";
+    public static final String BROADCAST_RECEIVER = "me.jordancarlson.spotifystreamer.services.receiver";
 }

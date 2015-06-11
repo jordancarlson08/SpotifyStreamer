@@ -278,6 +278,10 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+    public void broadcastUiChange() {
+        Intent intent = new Intent(Constants.BROADCAST_RECEIVER);
+    }
+
     private String formatRemaining(int duration, int current) {
         int remaining = (duration - current);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(remaining);
