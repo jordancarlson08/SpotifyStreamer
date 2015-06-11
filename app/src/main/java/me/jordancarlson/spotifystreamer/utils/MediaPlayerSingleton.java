@@ -18,7 +18,7 @@ public class MediaPlayerSingleton {
         return instance;
     }
 
-    public MediaPlayer getsMediaPlayer() {
+    public MediaPlayer getMediaPlayer() {
         return sMediaPlayer;
     }
 }

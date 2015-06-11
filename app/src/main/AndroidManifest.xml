@@ -28,12 +28,17 @@
         </activity>
         <activity
             android:name=".PlayerActivity"
-
             android:parentActivityName=".TopTracksActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.jordancarlson.spotifystreamer.TopTracksActivity" />
         </activity>
+
+        <service
+            android:name=".services.MusicService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

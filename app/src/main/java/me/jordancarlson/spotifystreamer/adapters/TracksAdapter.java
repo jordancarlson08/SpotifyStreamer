@@ -1,6 +1,7 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,8 @@ import com.squareup.picasso.Picasso;
 import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.fragments.PlayerFragment;
 import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
+import me.jordancarlson.spotifystreamer.services.MusicService;
+import me.jordancarlson.spotifystreamer.utils.Constants;
 
 /**
  * Custom adapter for the recycler view of Tracks returned by the Spotify API.
@@ -89,6 +92,12 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
 
         @Override
         public void onClick(View view) {
+
+            Intent musicService = new Intent(mContext, MusicService.class);
+//            musicService.putExtra("trackUrl", mTracks[mPosition].getTrackUrl());
+            musicService.putExtra(Constants.TRACKS, mTracks);
+            musicService.putExtra(Constants.POSITION, mPosition);
+            mContext.startService(musicService);
 
             FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
 
