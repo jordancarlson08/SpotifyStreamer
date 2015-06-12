@@ -6,7 +6,7 @@
           android:id="@+id/now_playing"
           android:orderInCategory="200"
           android:title="@string/now_playing"
-          android:icon="@android:drawable/ic_media_play"
+          android:icon="@mipmap/ic_music_circle_white_36dp"
           app:showAsAction="ifRoom"
           />
 </menu>

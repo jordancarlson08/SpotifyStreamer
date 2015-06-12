@@ -1,5 +1,6 @@
 package me.jordancarlson.spotifystreamer.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import me.jordancarlson.spotifystreamer.fragments.TopTracksFragment;
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {
 
     private final ParcelableArtist[] mArtists;
+    private Activity mActivity = null;
     private boolean mTwoPane;
     private Context mContext;
     public static final String SPOTIFY_ID = "spotifyId";
@@ -35,6 +37,11 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
     public ArtistAdapter(ParcelableArtist[] artists, boolean isTwoPane){
         mArtists = artists;
         mTwoPane = isTwoPane;
+    }
+    public ArtistAdapter(ParcelableArtist[] artists, boolean isTwoPane, Activity activity){
+        mArtists = artists;
+        mTwoPane = isTwoPane;
+        mActivity = activity;
     }
 
     @Override
@@ -109,6 +116,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
                 intent.putExtra(ARTIST_NAME, mArtistName);
                 intent.putExtra(SPOTIFY_ID, mSpotifyId);
                 mContext.startActivity(intent);
+
             }
         }
     }

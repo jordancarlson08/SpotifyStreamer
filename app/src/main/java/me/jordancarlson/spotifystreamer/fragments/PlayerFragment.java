@@ -2,7 +2,6 @@ package me.jordancarlson.spotifystreamer.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,8 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,7 +41,6 @@ import me.jordancarlson.spotifystreamer.R;
 import me.jordancarlson.spotifystreamer.models.ParcelableTrack;
 import me.jordancarlson.spotifystreamer.services.MusicService;
 import me.jordancarlson.spotifystreamer.utils.Constants;
-import me.jordancarlson.spotifystreamer.utils.MediaPlayerSingleton;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -89,6 +85,8 @@ public class PlayerFragment extends DialogFragment {
     private boolean mBound;
     private MusicService mMusicService;
     private int mSeek;
+    private boolean mOrientation;
+    private boolean mIsNowPlaying;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -102,10 +100,11 @@ public class PlayerFragment extends DialogFragment {
     };
 
 
-    public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position) {
+    public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position, boolean isNowPlaying) {
     PlayerFragment fragment = new PlayerFragment();
     Bundle args = new Bundle();
     ParcelableTrack track = tracks[position];
+        //TODO: Remove???
     args.putString(ARTIST_NAME, track.getArtistName());
     args.putString(ALBUM_NAME, track.getAlbumName());
     args.putString(TRACK_NAME, track.getTrackName());
@@ -113,6 +112,7 @@ public class PlayerFragment extends DialogFragment {
     args.putString(ALBUM_IMAGE, track.getAlbumImage());
     args.putParcelableArray(TRACKS, tracks);
     args.putInt(POSITION, position);
+    args.putBoolean(Constants.NOW_PLAYING, isNowPlaying);
     fragment.setArguments(args);
     return fragment;
 }
@@ -128,6 +128,7 @@ public class PlayerFragment extends DialogFragment {
             Parcelable[] parcelableArray = getArguments().getParcelableArray(TRACKS);
             mTracks = Arrays.copyOf(parcelableArray, parcelableArray.length, ParcelableTrack[].class);
             mPosition = getArguments().getInt(POSITION);
+            mIsNowPlaying = getArguments().getBoolean(Constants.NOW_PLAYING);
         }
         mConnection = new ServiceConnection() {
             @Override
@@ -150,6 +151,14 @@ public class PlayerFragment extends DialogFragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, view);
+
+        if (savedInstanceState != null) {
+            mSeek = savedInstanceState.getInt(Constants.SEEK);
+            mOrientation = savedInstanceState.getBoolean(Constants.ORIENTATION);
+            Parcelable[] parcelables = savedInstanceState.getParcelableArray(Constants.TRACKS);
+            mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
+            mPosition = savedInstanceState.getInt(Constants.POSITION);
+        }
 
         // Hide Toolbar if tablet
         if (mHideToolbar) {
@@ -188,10 +197,12 @@ public class PlayerFragment extends DialogFragment {
 
     private void playTrack(ParcelableTrack track) {
         updateTrackUi(track);
-        mPlay.setVisibility(View.GONE);
-        mPause.setVisibility(View.VISIBLE);
 
-        startMusicService();
+        if(!mBound) {
+            mPlay.setVisibility(View.GONE);
+            mPause.setVisibility(View.VISIBLE);
+            startMusicService();
+        }
 
         final Handler musicMethodsHandler = new Handler();
         Runnable musicRun = new Runnable() {
@@ -233,6 +244,8 @@ public class PlayerFragment extends DialogFragment {
         musicService.putExtra(Constants.TRACKS, mTracks);
         musicService.putExtra(Constants.POSITION, mPosition);
         musicService.putExtra(Constants.SEEK, mSeek);
+        musicService.putExtra(Constants.ORIENTATION, mOrientation);
+        musicService.putExtra(Constants.NOW_PLAYING, mIsNowPlaying);
         getActivity().startService(musicService);
         getActivity().bindService(musicService, mConnection, Context.BIND_AUTO_CREATE);
 
@@ -301,15 +314,15 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        if (mListener != null) {
-            mListener.onFragmentHidden(mTracks, mPosition);
-        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(Constants.SEEK, mMusicService.getCurrentPosition());
+        outState.putBoolean(Constants.ORIENTATION, true);
+        outState.putParcelableArray(Constants.TRACKS, mMusicService.getTracks());
+        outState.putInt(Constants.POSITION, mMusicService.getPosition());
     }
 
     @Override
@@ -323,6 +336,9 @@ public class PlayerFragment extends DialogFragment {
         super.onPause();
         getActivity().unregisterReceiver(mReceiver);
         getActivity().unbindService(mConnection);
+        if (mListener != null) {
+            mListener.onFragmentHidden(mTracks, mPosition, true);
+        }
     }
 
     @NonNull
@@ -331,9 +347,6 @@ public class PlayerFragment extends DialogFragment {
         mHideToolbar = true;
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        if (savedInstanceState != null) {
-            mSeek = savedInstanceState.getInt(Constants.SEEK);
-        }
         return dialog;
     }
 
@@ -358,7 +371,7 @@ public class PlayerFragment extends DialogFragment {
      * When the fragment is dismissed this callback saves the state of the music for re-creation.
      */
     public interface OnFragmentInteractionListener {
-        void onFragmentHidden(ParcelableTrack[] tracks, int position);
+        void onFragmentHidden(ParcelableTrack[] tracks, int position, boolean isNowPlaying);
     }
 
 }

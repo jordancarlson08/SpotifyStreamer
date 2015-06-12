@@ -94,7 +94,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         public void onClick(View view) {
 
             FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
-            PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition);
+            PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition, false);
 
             if (mContext.getResources().getBoolean(R.bool.isTablet)) {
                 fragment.show(fragmentManager, PLAYER_DIALOG_TAG);

@@ -23,6 +23,8 @@ MediaPlayer.OnErrorListener {
     private int mPosition;
     private final IBinder mBinder = new LocalBinder();
     private int mSeek;
+    private boolean mIsOrientationChange;
+    private boolean mIsNowPlaying;
 
     public MusicService() {
     }
@@ -33,13 +35,17 @@ MediaPlayer.OnErrorListener {
                 mMediaPlayer = MediaPlayerSingleton.getInstance().getMediaPlayer();
             }
 
-            mMediaPlayer.reset();
+            // Don't reset the media player if it's an orientation change or coming from the now playing button
+            if (!mIsOrientationChange && !mIsNowPlaying) {
+                mMediaPlayer.reset();
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setDataSource(track.getTrackUrl());
+                mMediaPlayer.setOnPreparedListener(this);
+                mMediaPlayer.setOnErrorListener(this);
+                mMediaPlayer.prepareAsync();
+            }
 
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(track.getTrackUrl());
-            mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.setOnErrorListener(this);
-            mMediaPlayer.prepareAsync();
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,7 +54,9 @@ MediaPlayer.OnErrorListener {
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
-        mMediaPlayer.seekTo(mSeek);
+//        if (mSeek > 0) {
+//            mMediaPlayer.seekTo(mSeek);
+//        }
         mMediaPlayer.start();
     }
 
@@ -75,6 +83,8 @@ MediaPlayer.OnErrorListener {
         mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
         mPosition = intent.getIntExtra(Constants.POSITION, 0);
         mSeek = intent.getIntExtra(Constants.SEEK, 0);
+        mIsOrientationChange = intent.getBooleanExtra(Constants.ORIENTATION, false);
+        mIsNowPlaying = intent.getBooleanExtra(Constants.NOW_PLAYING, false);
         playTrack(mTracks[mPosition]);
 
         return super.onStartCommand(intent, flags, startId);
@@ -111,6 +121,8 @@ MediaPlayer.OnErrorListener {
     }
     public void nextSong(){
         mPosition++;
+        mIsOrientationChange = false;
+        mIsNowPlaying = false;
         if (mPosition < mTracks.length) {
             playTrack(mTracks[mPosition]);
 
@@ -122,6 +134,8 @@ MediaPlayer.OnErrorListener {
     }
     public void previousSong(){
         mPosition--;
+        mIsOrientationChange = false;
+        mIsNowPlaying = false;
         if (mPosition >= 0) {
             playTrack(mTracks[mPosition]);
 
@@ -141,6 +155,12 @@ MediaPlayer.OnErrorListener {
     }
     public void seekTo (int pos){
         mMediaPlayer.seekTo(pos);
+    }
+    public ParcelableTrack[] getTracks(){
+        return mTracks;
+    }
+    public int getPosition(){
+        return mPosition;
     }
 
 
