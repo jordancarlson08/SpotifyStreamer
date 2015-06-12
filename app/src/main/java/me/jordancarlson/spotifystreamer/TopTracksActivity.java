@@ -87,7 +87,7 @@ public class TopTracksActivity extends AppCompatActivity implements PlayerFragme
     }
 
     @Override
-    public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek) {
+    public void onFragmentHidden(ParcelableTrack[] tracks, int position) {
 
     }
 

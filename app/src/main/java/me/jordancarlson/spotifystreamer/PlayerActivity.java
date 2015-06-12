@@ -148,7 +148,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerFragment.
     }
 
     @Override
-    public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek) {
+    public void onFragmentHidden(ParcelableTrack[] tracks, int position) {
 
     }
 }

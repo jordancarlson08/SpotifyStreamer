@@ -33,7 +33,6 @@ public class ArtistSearchActivity extends AppCompatActivity implements ArtistSea
     private boolean mIsHidden;
     private ParcelableTrack[] mTracks;
     private int mPosition;
-    private int mSeek;
 //    @InjectView(R.id.artistRecyclerView) RecyclerView mRecyclerView;
 //    @InjectView(R.id.searchEditText) EditText mSearchEditText;
 //    private ParcelableArtist[] mArtists;
@@ -113,7 +112,7 @@ public class ArtistSearchActivity extends AppCompatActivity implements ArtistSea
             if(mIsHidden) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
 
-                PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition, mSeek);
+                PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition);
 
                 if (getResources().getBoolean(R.bool.isTablet)) {
 
@@ -165,11 +164,10 @@ public class ArtistSearchActivity extends AppCompatActivity implements ArtistSea
     }
 
     @Override
-    public void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek) {
+    public void onFragmentHidden(ParcelableTrack[] tracks, int position) {
         mIsHidden = true;
         mTracks = tracks;
         mPosition = position;
-        mSeek = seek;
     }
 
     @Override

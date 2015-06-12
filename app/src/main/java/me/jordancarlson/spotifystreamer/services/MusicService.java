@@ -22,6 +22,7 @@ MediaPlayer.OnErrorListener {
     private ParcelableTrack[] mTracks;
     private int mPosition;
     private final IBinder mBinder = new LocalBinder();
+    private int mSeek;
 
     public MusicService() {
     }
@@ -47,18 +48,12 @@ MediaPlayer.OnErrorListener {
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
+        mMediaPlayer.seekTo(mSeek);
         mMediaPlayer.start();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-
-        Parcelable[] parcelables = intent.getParcelableArrayExtra(Constants.TRACKS);
-        mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
-        mPosition = intent.getIntExtra(Constants.POSITION, 0);
-
-        playTrack(mTracks[mPosition]);
-
         return mBinder;
     }
 
@@ -76,6 +71,12 @@ MediaPlayer.OnErrorListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Parcelable[] parcelables = intent.getParcelableArrayExtra(Constants.TRACKS);
+        mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
+        mPosition = intent.getIntExtra(Constants.POSITION, 0);
+        mSeek = intent.getIntExtra(Constants.SEEK, 0);
+        playTrack(mTracks[mPosition]);
+
         return super.onStartCommand(intent, flags, startId);
 //        return Service.START_STICKY;
     }
@@ -117,8 +118,8 @@ MediaPlayer.OnErrorListener {
             mPosition = 0;
             playTrack(mTracks[mPosition]);
         }
+        broadcastSongChanged();
     }
-
     public void previousSong(){
         mPosition--;
         if (mPosition >= 0) {
@@ -128,6 +129,12 @@ MediaPlayer.OnErrorListener {
             mPosition = 9;
             playTrack(mTracks[mPosition]);
         }
+        broadcastSongChanged();
+    }
+    private void broadcastSongChanged() {
+        Intent intent = new Intent(Constants.BROADCAST_RECEIVER);
+        intent.putExtra(Constants.TRACK, mTracks[mPosition]);
+        sendBroadcast(intent);
     }
     public void stopMusic(){
         mMediaPlayer.stop();

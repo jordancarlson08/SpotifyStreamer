@@ -93,20 +93,11 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.TrackViewH
         @Override
         public void onClick(View view) {
 
-            Intent musicService = new Intent(mContext, MusicService.class);
-//            musicService.putExtra("trackUrl", mTracks[mPosition].getTrackUrl());
-            musicService.putExtra(Constants.TRACKS, mTracks);
-            musicService.putExtra(Constants.POSITION, mPosition);
-            mContext.startService(musicService);
-
             FragmentManager fragmentManager = ((AppCompatActivity) mContext).getSupportFragmentManager();
-
-            PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition, 0);
+            PlayerFragment fragment = PlayerFragment.newInstance(mTracks, mPosition);
 
             if (mContext.getResources().getBoolean(R.bool.isTablet)) {
-
                 fragment.show(fragmentManager, PLAYER_DIALOG_TAG);
-
             } else {
                 ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
                         .replace(android.R.id.content, fragment, PLAYER_FRAG_TAG)

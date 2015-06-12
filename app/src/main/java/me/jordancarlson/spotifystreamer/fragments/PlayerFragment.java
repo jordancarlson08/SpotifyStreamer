@@ -3,10 +3,12 @@ package me.jordancarlson.spotifystreamer.fragments;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -83,12 +85,24 @@ public class PlayerFragment extends DialogFragment {
     private OnFragmentInteractionListener mListener;
     private ParcelableTrack[] mTracks;
     private int mPosition;
-    private int mSeek;
     private ServiceConnection mConnection;
     private boolean mBound;
     private MusicService mMusicService;
+    private int mSeek;
 
-    public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position, int seek) {
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                ParcelableTrack track = bundle.getParcelable(Constants.TRACK);
+                updateTrackUi(track);
+            }
+        }
+    };
+
+
+    public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position) {
     PlayerFragment fragment = new PlayerFragment();
     Bundle args = new Bundle();
     ParcelableTrack track = tracks[position];
@@ -98,7 +112,6 @@ public class PlayerFragment extends DialogFragment {
     args.putString(TRACK_URL, track.getTrackUrl());
     args.putString(ALBUM_IMAGE, track.getAlbumImage());
     args.putParcelableArray(TRACKS, tracks);
-    args.putInt(SEEK, seek);
     args.putInt(POSITION, position);
     fragment.setArguments(args);
     return fragment;
@@ -112,15 +125,9 @@ public class PlayerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            String artistName = getArguments().getString(ARTIST_NAME);
-            String albumName = getArguments().getString(ALBUM_NAME);
-            String trackName = getArguments().getString(TRACK_NAME);
-            String trackUrl = getArguments().getString(TRACK_URL);
-            String albumImage = getArguments().getString(ALBUM_IMAGE);
             Parcelable[] parcelableArray = getArguments().getParcelableArray(TRACKS);
             mTracks = Arrays.copyOf(parcelableArray, parcelableArray.length, ParcelableTrack[].class);
             mPosition = getArguments().getInt(POSITION);
-            mSeek = getArguments().getInt(SEEK);
         }
         mConnection = new ServiceConnection() {
             @Override
@@ -163,27 +170,28 @@ public class PlayerFragment extends DialogFragment {
         return view;
     }
 
+    private void updateTrackUi(ParcelableTrack track) {
+        if (mArtistTextView != null && mAlbumTextView != null && mTrackTextView != null) {
+            mArtistTextView.setText(track.getArtistName());
+            mAlbumTextView.setText(track.getAlbumName());
+            mTrackTextView.setText(track.getTrackName());
+
+            if (!TextUtils.isEmpty(track.getAlbumImage())) {
+                Picasso.with(getActivity())
+                        .load(track.getAlbumImage())
+                        .fit()
+                        .centerCrop()
+                        .into(mAlbumImageView);
+            }
+        }
+    }
 
     private void playTrack(ParcelableTrack track) {
-        mArtistTextView.setText(track.getArtistName());
-        mAlbumTextView.setText(track.getAlbumName());
-        mTrackTextView.setText(track.getTrackName());
-
-        if (!TextUtils.isEmpty(track.getAlbumImage())) {
-            Picasso.with(getActivity())
-                    .load(track.getAlbumImage())
-                    .fit()
-                    .centerCrop()
-                    .into(mAlbumImageView);
-        }
+        updateTrackUi(track);
         mPlay.setVisibility(View.GONE);
         mPause.setVisibility(View.VISIBLE);
 
         startMusicService();
-
-
-
-
 
         final Handler musicMethodsHandler = new Handler();
         Runnable musicRun = new Runnable() {
@@ -192,7 +200,6 @@ public class PlayerFragment extends DialogFragment {
             public void run() {
                 if (mBound) {
                     updateSeekBar();
-
                 }else if(!mBound) {
                     Log.v(TAG, "Waiting to be bound");
                 }
@@ -218,42 +225,15 @@ public class PlayerFragment extends DialogFragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-
-
-
-        //TODO: Move to service
-//        try {
-//            mMediaPlayer = MediaPlayerSingleton.getInstance().getMediaPlayer();
-//            mMediaPlayer.reset();
-//            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//            mMediaPlayer.setDataSource(trackUrl);
-//            mMediaPlayer.prepareAsync();
-//            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-//            progressDialog.setMessage(getString(R.string.progress_dialog_message));
-//            progressDialog.show();
-//            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                @Override
-//                public void onPrepared(MediaPlayer mediaPlayer) {
-//                    progressDialog.dismiss();
-//                    if (mSeek > 0) {
-//                        mMediaPlayer.seekTo(mSeek);
-//                    }
-//                    mMediaPlayer.start();
-//                    mPlay.setVisibility(View.GONE);
-//                    mPause.setVisibility(View.VISIBLE);
-//                    mSeekBar.setMax(mMediaPlayer.getDuration());
-//                    updateSeekBar();
-//                }
-//            });
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void startMusicService() {
+
         Intent musicService = new Intent(getActivity(), MusicService.class);
         musicService.putExtra(Constants.TRACKS, mTracks);
         musicService.putExtra(Constants.POSITION, mPosition);
+        musicService.putExtra(Constants.SEEK, mSeek);
+        getActivity().startService(musicService);
         getActivity().bindService(musicService, mConnection, Context.BIND_AUTO_CREATE);
 
     }
@@ -269,17 +249,12 @@ public class PlayerFragment extends DialogFragment {
         if (mMusicService.isPlaying()) {
             mSeekBar.setMax(mMusicService.getDuration());
             mSeekBar.setProgress(mMusicService.getCurrentPosition());
-//            mSeek = mMediaPlayer.getCurrentPosition();
             mHandler.postDelayed(run, 10);
             String elapsed = formatElapsed(mMusicService.getCurrentPosition());
             String remaining = formatRemaining(mMusicService.getDuration(), mMusicService.getCurrentPosition());
             mTimeElapsedTextView.setText(elapsed);
             mTimeRemainingTextView.setText(remaining);
         }
-    }
-
-    public void broadcastUiChange() {
-        Intent intent = new Intent(Constants.BROADCAST_RECEIVER);
     }
 
     private String formatRemaining(int duration, int current) {
@@ -326,7 +301,28 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        mListener.onFragmentHidden(mTracks, mPosition, mSeek);
+        if (mListener != null) {
+            mListener.onFragmentHidden(mTracks, mPosition);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(Constants.SEEK, mMusicService.getCurrentPosition());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(mReceiver, new IntentFilter(Constants.BROADCAST_RECEIVER));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mReceiver);
+        getActivity().unbindService(mConnection);
     }
 
     @NonNull
@@ -335,14 +331,10 @@ public class PlayerFragment extends DialogFragment {
         mHideToolbar = true;
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(ParcelableTrack[] tracks, int position, int seek) {
-        if (mListener != null) {
-            mListener.onFragmentHidden(tracks, position, seek);
+        if (savedInstanceState != null) {
+            mSeek = savedInstanceState.getInt(Constants.SEEK);
         }
+        return dialog;
     }
 
     @Override
@@ -363,18 +355,10 @@ public class PlayerFragment extends DialogFragment {
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * When the fragment is dismissed this callback saves the state of the music for re-creation.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentHidden(ParcelableTrack[] tracks, int position, int seek);
+        void onFragmentHidden(ParcelableTrack[] tracks, int position);
     }
 
 }
