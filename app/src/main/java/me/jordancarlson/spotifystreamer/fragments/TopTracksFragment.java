@@ -79,7 +79,6 @@ public class TopTracksFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mArtistName = getArguments().getString(ARTIST_NAME);
-            String spotifyId = getArguments().getString(SPOTIFY_ID);
         }
     }
 

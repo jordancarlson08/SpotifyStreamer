@@ -1,7 +1,5 @@
 package me.jordancarlson.spotifystreamer;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
@@ -58,7 +56,9 @@ public class ArtistSearchActivity extends AppCompatActivity implements ArtistSea
         if (savedInstanceState != null) {
             mCurrentArtist = savedInstanceState.getString(ARTIST_NAME);
             Parcelable[] parcelables = savedInstanceState.getParcelableArray(Constants.TRACKS);
-            mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
+            if (parcelables != null) {
+                mTracks = Arrays.copyOf(parcelables, parcelables.length, ParcelableTrack[].class);
+            }
             mPosition = savedInstanceState.getInt(Constants.POSITION);
             mIsHidden = savedInstanceState.getBoolean(Constants.ORIENTATION);
         }

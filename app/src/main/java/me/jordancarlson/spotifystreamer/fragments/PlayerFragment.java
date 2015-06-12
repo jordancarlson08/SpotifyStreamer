@@ -44,22 +44,10 @@ import me.jordancarlson.spotifystreamer.utils.Constants;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link PlayerFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link PlayerFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Used for displaying the interface for controlling music playback.
  */
 public class PlayerFragment extends DialogFragment {
 
-    private static final String ARTIST_NAME = "artistName";
-    private static final String ALBUM_NAME = "albumName";
-    private static final String TRACK_NAME = "trackName";
-    private static final String ALBUM_IMAGE = "albumImage";
-    private static final String TRACK_URL = "trackUrl";
-    private static final String TRACKS = "tracks";
-    private static final String POSITION = "position";
-    private static final String SEEK = "seek";
     private static final String TAG = PlayerFragment.class.getSimpleName();
 
     @InjectView(R.id.playerArtistTextView) TextView mArtistTextView;
@@ -77,7 +65,6 @@ public class PlayerFragment extends DialogFragment {
 
 
     private boolean mHideToolbar;
-
     private OnFragmentInteractionListener mListener;
     private ParcelableTrack[] mTracks;
     private int mPosition;
@@ -103,15 +90,8 @@ public class PlayerFragment extends DialogFragment {
     public static PlayerFragment newInstance(ParcelableTrack[] tracks, int position, boolean isNowPlaying) {
     PlayerFragment fragment = new PlayerFragment();
     Bundle args = new Bundle();
-    ParcelableTrack track = tracks[position];
-        //TODO: Remove???
-    args.putString(ARTIST_NAME, track.getArtistName());
-    args.putString(ALBUM_NAME, track.getAlbumName());
-    args.putString(TRACK_NAME, track.getTrackName());
-    args.putString(TRACK_URL, track.getTrackUrl());
-    args.putString(ALBUM_IMAGE, track.getAlbumImage());
-    args.putParcelableArray(TRACKS, tracks);
-    args.putInt(POSITION, position);
+    args.putParcelableArray(Constants.TRACKS, tracks);
+    args.putInt(Constants.POSITION, position);
     args.putBoolean(Constants.NOW_PLAYING, isNowPlaying);
     fragment.setArguments(args);
     return fragment;
@@ -125,9 +105,9 @@ public class PlayerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            Parcelable[] parcelableArray = getArguments().getParcelableArray(TRACKS);
+            Parcelable[] parcelableArray = getArguments().getParcelableArray(Constants.TRACKS);
             mTracks = Arrays.copyOf(parcelableArray, parcelableArray.length, ParcelableTrack[].class);
-            mPosition = getArguments().getInt(POSITION);
+            mPosition = getArguments().getInt(Constants.POSITION);
             mIsNowPlaying = getArguments().getBoolean(Constants.NOW_PLAYING);
         }
         mConnection = new ServiceConnection() {
@@ -218,7 +198,6 @@ public class PlayerFragment extends DialogFragment {
             }
         };
         musicMethodsHandler.postDelayed(musicRun, 1000);
-
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

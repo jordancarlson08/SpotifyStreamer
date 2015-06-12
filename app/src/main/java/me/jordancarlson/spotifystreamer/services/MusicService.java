@@ -54,9 +54,6 @@ MediaPlayer.OnErrorListener {
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
-//        if (mSeek > 0) {
-//            mMediaPlayer.seekTo(mSeek);
-//        }
         mMediaPlayer.start();
     }
 

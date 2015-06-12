@@ -3,7 +3,6 @@ package me.jordancarlson.spotifystreamer.fragments;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -33,10 +32,6 @@ import me.jordancarlson.spotifystreamer.adapters.ArtistAdapter;
 import me.jordancarlson.spotifystreamer.models.ParcelableArtist;
 
 public class ArtistSearchFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     private static final String ARTIST_LIST = "artistList";
     @InjectView(R.id.artistRecyclerView) RecyclerView mRecyclerView;
@@ -57,8 +52,6 @@ public class ArtistSearchFragment extends Fragment {
     public static ArtistSearchFragment newInstance(String param1, String param2) {
         ArtistSearchFragment fragment = new ArtistSearchFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,8 +64,6 @@ public class ArtistSearchFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            String param1 = getArguments().getString(ARG_PARAM1);
-            String param2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
